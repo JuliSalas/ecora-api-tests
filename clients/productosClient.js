@@ -5,8 +5,8 @@ function cabecera(token) {
 }
 
 module.exports = {
-  listar: () => api.get('/api/productos'),
-  crear: (cuerpo) => api.post('/api/productos', cuerpo),
+  listar: (id) => api.get(`/api/productos/${id}`),
+  crear: (cuerpo) => api.post('/api/productos/', cuerpo),
   actualizar: (token, id, cuerpo) => api.put(`/api/productos/${id}`, cuerpo, cabecera(token)),
   eliminar: (token, id, cuerpo) => api.delete(`/api/productos/${id}`, cuerpo, cabecera(token))
 };
