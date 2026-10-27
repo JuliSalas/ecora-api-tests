@@ -1,10 +1,4 @@
 {
-  "tokenInvalido": "abc.def.ghi",
-  "productoExistente": "6a7bb4b567d11ad7a0e1dc01",
-  "productoInexistente": "64b7f0c2a1b2c3d4e5f60718",
-  "ordenInexistente": "64b7f0c2a1b2c3d4e5f60718",
-  "idMalFormado": "abc",
-  "totalValido": 100,
-  "estadoNuevo": "Confirmada",
-  "estadoInvalido": "Completada"
+  "categoriaExistente": "6a7bb43536bbd28d46916b4e",
+  "categoriaInexistente": "6a7bb42b36bbd28d46816b4c"
 }

@@ -5,7 +5,7 @@ const datos = require('../data/productos.data.json');
 describe('GET /api/productos', () => {
 
   // Test 1: GET de un producto específico
-  test('GET /products/:id debería traer un producto existente específico', async () => {
+  test('GET /productos/:id debería traer un producto existente específico', async () => {
     const response = await productos.listar(datos.productoExistente);
 
     expect(response.status).toBe(200);

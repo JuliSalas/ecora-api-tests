@@ -1,125 +1,62 @@
 // Casos PR-06 a PR-10: Categorias (responsable: Diego)
-const ordenes = require('../clients/ordenesClient');
-const { loginAdmin, loginCliente } = require('../helpers/auth');
-const datos = require('../data/ordenes.data.json');
+const categorias = require('../clients/categoriasClient');
+const datos = require('../data/categorias.data.json');
 
-let admin;
-let cliente;
+describe('E-Commerce API - Category Endpoints', () => {
 
-beforeAll(async () => {
-  admin = await loginAdmin();
-  cliente = await loginCliente();
-});
+  // Test 1: GET /api/categorias para obtener todas
+  test('GET /api/categorias debería retornar una lista completa de categorías', async () => {
+    const response = await categorias.listar();
 
-describe('GET /api/ordenes', () => {
-  test('OR-01 rechaza consultar órdenes sin token', async () => {
-    const res = await ordenes.listar();
-    expect(res.status).toBe(401);
-    expect(res.data.msg).toContain('El token es requerido');
+    expect(response.status).toBe(200);
+    expect(Array.isArray(response.data)).toBe(true);
+    expect(response.data.length).toBeGreaterThan(0);
   });
 
-  test('OR-02 lista las órdenes con token válido', async () => {
-    const res = await ordenes.listar(admin.token);
-    expect(res.status).toBe(200);
-    expect(Array.isArray(res.data)).toBe(true);
-    if (res.data.length > 0) {
-      expect(res.data[0]).toHaveProperty('_id');
-      expect(res.data[0]).toHaveProperty('estado');
-      expect(res.data[0]).toHaveProperty('total');
-    }
+  // Test 2: GET /api/categorias/:id debería retornar una categoría específica
+  test('GET /api/categorias/:id debería retornar correctamente una categoría existente', async () => {
+    const response = await categorias.listarEspecifico(datos.categoriaExistente);
+
+    expect(response.status).toBe(200);
+    expect(response.data).toHaveProperty('_id', datos.categoriaExistente);
+    expect(response.data).toHaveProperty('genero');
+    expect(response.data).toHaveProperty('tipo');
   });
 
-  test('OR-03 rechaza un token inválido', async () => {
-    const res = await ordenes.listar(datos.tokenInvalido);
-    expect(res.status).toBe(401);
-    expect(res.data.msg).toContain('Token inválido o vencido');
-  });
-});
+  // Test 3: POST /api/categorias debería crear una categoría nueva
+  test('POST /api/categorias debería crear una categoría nueva única', async () => {
+    const uniqueTipo = `Gadgets-prueba-${Date.now()}`;
+    const payload = {
+      genero: "Hombre",
+      tipo: uniqueTipo
+    };
 
-describe('GET /api/ordenes/mis-compras', () => {
-  beforeAll(async () => {
-    // El cliente crea una orden para que "mis compras" no esté vacío
-    const res = await ordenes.crear(cliente.token, {
-      productos: [datos.productoExistente],
-      total: datos.totalValido
-    });
-    expect(res.status).toBe(201);
+    const response = await categorias.crear(payload);
+
+    expect(response.status).toBe(201);
+    expect(response.data).toHaveProperty('msj', 'Categoria registrada correctamente');
+    expect(response.data.categoria.tipo).toBe(uniqueTipo);
   });
 
-  test('OR-04 devuelve solo las compras del usuario autenticado', async () => {
-    const res = await ordenes.misCompras(cliente.token);
-    expect(res.status).toBe(200);
-    expect(Array.isArray(res.data)).toBe(true);
-    expect(res.data.length).toBeGreaterThan(0);
-    res.data.forEach((orden) => {
-      expect(String(orden.clienteAsociado[0].cliente._id)).toBe(String(cliente.usuario.id));
-    });
+  // Test 4: POST /api/categorias validación de género
+  test('POST /api/categorias debería fallar si el género no existe', async () => {
+    const payload = {
+      genero: "Indefinido",
+      tipo: `TestType-${Date.now()}`
+    };
+
+    const response = await categorias.crear(payload);
+
+    expect(response.status).toBe(400);
+    expect(response.data).toHaveProperty('msj', 'El genero de la categoria debe ser hombre o mujer');
   });
 
-  test('OR-05 rechaza consultar mis compras sin token', async () => {
-    const res = await ordenes.misCompras();
-    expect(res.status).toBe(401);
-    expect(res.data.msg).toContain('El token es requerido');
-  });
-});
+  // Test 5: GET /api/categorias/:id con una id no existente
+  test('GET /api/categorias/:id debería retornar 404 por una id no existente', async () => {
+    const response = await categorias.listarEspecifico(datos.categoriaInexistente);
 
-describe('POST /api/ordenes', () => {
-  test('OR-06 crea una orden válida', async () => {
-    const res = await ordenes.crear(admin.token, {
-      productos: [datos.productoExistente],
-      total: datos.totalValido
-    });
-    expect(res.status).toBe(201);
-    expect(res.data.msj).toBe('Orden creada correctamente');
-    expect(res.data.orden.estado).toBe('Pendiente');
-    expect(String(res.data.orden.total)).toBe(String(datos.totalValido));
-    expect(res.data.orden.productosOrden).toHaveLength(1);
+    expect(response.status).toBe(404);
+    expect(response.data).toHaveProperty('msj', 'Categoria no encontrada');
   });
 
-  test('OR-07 rechaza una orden sin productos', async () => {
-    const res = await ordenes.crear(admin.token, {
-      productos: [],
-      total: datos.totalValido
-    });
-    expect(res.status).toBe(400);
-    expect(res.data.msj).toBe('Productos y total son requeridos');
-  });
-
-  test('OR-08 rechaza una orden con un producto inexistente', async () => {
-    const res = await ordenes.crear(admin.token, {
-      productos: [datos.productoInexistente],
-      total: datos.totalValido
-    });
-    expect(res.status).toBe(400);
-    expect(res.data.msj).toContain('no existen');
-  });
-});
-
-describe('PUT /api/ordenes/:id', () => {
-  let ordenId;
-
-  beforeAll(async () => {
-    // Se crea una orden propia para no modificar las de otros integrantes
-    const res = await ordenes.crear(admin.token, {
-      productos: [datos.productoExistente],
-      total: datos.totalValido
-    });
-    expect(res.status).toBe(201);
-    ordenId = res.data.orden._id;
-  });
-
-  test('OR-09 actualiza el estado de una orden', async () => {
-    const res = await ordenes.actualizar(admin.token, ordenId, { estado: datos.estadoNuevo });
-    expect(res.status).toBe(200);
-    expect(res.data.msj).toBe('Estado de la orden actualizado correctamente');
-    expect(res.data.orden.estado).toBe(datos.estadoNuevo);
-  });
-
-  test('OR-10 rechaza actualizar una orden que no existe', async () => {
-    const res = await ordenes.actualizar(admin.token, datos.ordenInexistente, {
-      estado: datos.estadoNuevo
-    });
-    expect(res.status).toBe(404);
-    expect(res.data.msj).toBe('Orden no encontrada');
-  });
 });
