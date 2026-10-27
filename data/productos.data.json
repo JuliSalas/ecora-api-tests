@@ -1,0 +1,8 @@
+{
+  "productoExistente": "6a7baa29dbe42cb80305f42d",
+  "productoInexistente": "1a7baa29dbe42cb80305f42d",
+  "categoriaInexistente": "7b8cbb26fcd42cb80305f42c",
+  "idMalFormado": "abc",
+  "tallaValida": "Unique",
+  "precioBienFormado": "CRC 14 000"
+}
