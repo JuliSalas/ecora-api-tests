@@ -2,7 +2,7 @@
 const categorias = require('../clients/categoriasClient');
 const datos = require('../data/categorias.data.json');
 
-describe('E-Commerce API - Category Endpoints', () => {
+describe('GET /api/categorias', () => {
 
   // Test 1: GET /api/categorias para obtener todas
   test('GET /api/categorias debería retornar una lista completa de categorías', async () => {
