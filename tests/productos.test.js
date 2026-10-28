@@ -37,10 +37,10 @@ describe('GET /api/productos', () => {
   // Test 3: POST fallo usando una categoría no existente
   test('POST /productos debería fallar con un 400/422 al usar una categoría no existente', async () => {
     const payload = {
-      nombre: `Invalid Cat Item ${Date.now()}`,
+      nombre: `Producto inválido - ${Date.now()}`,
       categorias: [datos.categoriaInexistente],
       tallas: [datos.tallaValida],
-      descripcion: "Should fail validation",
+      descripcion: "Debería fallar validación.",
       precio: datos.precioBienFormado
     };
 
