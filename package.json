@@ -6,6 +6,7 @@
     "test": "jest --runInBand",
     "test:ordenes": "jest --runInBand tests/ordenes.test.js",
     "test:extras": "jest --runInBand tests/ordenes.extras.test.js",
+    "test:usuarios": "jest --runInBand tests/usuarios.test.js",
     "test:productos": "jest --runInBand tests/productos.test.js",
     "test:categorias": "jest --runInBand tests/categorias.test.js",
     "test:prod-cat": "jest --runInBand tests/productos.test.js tests/categorias.test.js"
